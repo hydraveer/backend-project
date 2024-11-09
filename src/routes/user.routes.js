@@ -3,7 +3,7 @@ import {registerUser} from "../controllers/user.controllers.js"
 import { upload } from "../middleware/multer.middelware.js";
 const router = Router()
 
-router.route("/register").get(
+router.route("/register").post(
     upload.fields([
         {
             name: "avatar",
