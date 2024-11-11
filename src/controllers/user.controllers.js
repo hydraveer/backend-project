@@ -204,26 +204,134 @@ const refreshAccessToken = asyncHandler( async(req,res)=>{
     }
 })
 const changeCurrentPassword = asyncHandler(async(req,res)=>{
-    const {oldPassword, newPassword} = req.body
-
-    const user = await User.findById(req.user?._id)
-    const ispasswordCorrect = await user.isPasswordCorrect(oldPassword)
-
-    if(!ispasswordCorrect){
-        throw new ApiError("401", "Wrong password!")
+    try {
+        const {oldPassword, newPassword} = req.body
+    
+        const user = await User.findById(req.user?._id)
+        const ispasswordCorrect = await user.isPasswordCorrect(oldPassword)
+    
+        if(!ispasswordCorrect){
+            throw new ApiError("401", "Wrong password!")
+        }
+        user.password = newPassword
+        await user.save({validateBeforeSave:false})
+    
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(200, {}, "Password change successfully")
+        )
+    } catch (error) {
+        throw new ApiError(400, error?.message || "something went wrong")
     }
-    user.password = newPassword
-    await user.save({validateBeforeSave:false})
+})
 
+const getCurrentUser = asyncHandler(async(req,res)=>{
+    const user = req.user
     return res
     .status(200)
     .json(
-        new ApiResponse(200, {}, "Password change successfully")
+        new ApiError(200, user, "Current User fetch successfully")
     )
+})
+const updateAccountDetails = asyncHandler(async(req,res)=>{
+    try {
+        const {username, fullname, email} = req.body 
+        if(!fullname || !username || !email){
+            throw new ApiError(400, "All fieldsa are required")
+        }
+        const userId = req.user?._id
+        const user = await User.findByIdAndUpdate(
+            userId,
+            {
+                $set: {
+                    fullname,
+                    email,
+                    username
+                }
+            },
+            {new: true}
+        ).select("-password")
+    
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(200, user, "User details updated successfully")
+        )
+    } catch (error) {
+        throw new ApiError(400, error?.message || "something went wrong")
+    }
+})
+const updateAvatar = asyncHandler(async(req,res)=>{
+    try {
+        const avatarLocalPath = req.file?.path
+    
+        if(!avatarLocalPath){
+            throw new ApiError(404,"please upload avatar!")
+        }
+        const avatar = await uploadOnCloudinary(avatarLocalPath)
+    
+        if(!avatar.url){
+            throw new ApiError(500,"Error while upload the avatar on cloudinary")
+        }
+        const user = await User.findByIdAndUpdate(
+            req.user?._id,
+            {
+                $set:{
+                    avatar: avatar?.url
+                }
+            },
+            {new: true}
+        ).select("-password")
+    
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(200, user, "Avatar updated successfully!")
+        )
+    } catch (error) {
+        throw new ApiError(400, error?.message || "something went wrong")
+    }
+})
+const updateCoverImage = asyncHandler(async(req,res)=>{
+    try {
+        const coverImageLocalPath = req.file?.path
+    
+        if(!coverImageLocalPath){
+            throw new ApiError(404,"please upload coverImage!")
+        }
+        const coverImage= await uploadOnCloudinary(coverImageLocalPath)
+    
+        if(!coverImage.url){
+            throw new ApiError(500,"Error while upload the coverImage on cloudinary")
+        }
+        const user = await User.findByIdAndUpdate(
+            req.user?._id,
+            {
+                $set:{
+                    coverImage: coverImage?.url
+                }
+            },
+            {new: true}
+        ).select("-password")
+    
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(200, user, "coverImage updated successfully!")
+        )
+    } catch (error) {
+        throw new ApiError(400, error?.message || "something went wrong")
+    }
 })
 export {
     registerUser,
     loginUser,
     logOutUser,
-    refreshAccessToken
+    refreshAccessToken,
+    getCurrentUser,
+    changeCurrentPassword,
+    updateAccountDetails,
+    updateAvatar,
+    updateCoverImage
 }
