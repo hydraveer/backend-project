@@ -325,7 +325,7 @@ const updateCoverImage = asyncHandler(async(req,res)=>{
         throw new ApiError(400, error?.message || "something went wrong")
     }
 })
-const getUserCurrentProfile = asyncHandler(async(req,res)=>{
+const getUserCurrentChannel = asyncHandler(async(req,res)=>{
     const {username} = req.params
 
     if(!username?.trim()){
@@ -451,6 +451,6 @@ export {
     updateAccountDetails,
     updateAvatar,
     updateCoverImage,
-    getUserCurrentProfile,
+    getUserCurrentChannel,
     getUserWatchHistory
 }
