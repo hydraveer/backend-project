@@ -232,14 +232,14 @@ const getCurrentUser = asyncHandler(async(req,res)=>{
     return res
     .status(200)
     .json(
-        new ApiError(200, user, "Current User fetch successfully")
+        new ApiResponse(200, user, "Current User fetch successfully")
     )
 })
 const updateAccountDetails = asyncHandler(async(req,res)=>{
     try {
         const {username, fullname, email} = req.body 
-        if(!fullname || !username || !email){
-            throw new ApiError(400, "All fieldsa are required")
+        if(!(fullname || username || email)){
+            throw new ApiError(400, "All fields are required")
         }
         const userId = req.user?._id
         const user = await User.findByIdAndUpdate(
@@ -253,7 +253,6 @@ const updateAccountDetails = asyncHandler(async(req,res)=>{
             },
             {new: true}
         ).select("-password")
-    
         return res
         .status(200)
         .json(
@@ -283,7 +282,7 @@ const updateAvatar = asyncHandler(async(req,res)=>{
                 }
             },
             {new: true}
-        ).select("-password")
+        ).select("-password -refreshToken")
     
         return res
         .status(200)
@@ -376,7 +375,7 @@ const getUserCurrentChannel = asyncHandler(async(req,res)=>{
                 fullname: 1,
                 subscribersCount: 1,
                 subscriberChannel: 1,
-                isSubscriber,
+                isSubscriber: 1,
                 avatar: 1,
                 coverImage: 1,
                 email: 1
@@ -438,7 +437,7 @@ const getUserWatchHistory = asyncHandler(async(req,res)=>{
     return res
     .status(200)
     .json(
-        new ApiResponse(200, user[0].watchHistory, "Watch history fetched successfully")
+        new ApiResponse(200, user[0]?.watchHistory, "Watch history fetched successfully")
     )
 })
 export {
