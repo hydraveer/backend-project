@@ -97,7 +97,6 @@ const loginUser = asyncHandler( async (req,res)=>{
     // return the refresh token and access token in cookies
 
     const {email, username, password} = req.body
-    console.log(email);
     if([username, password, email].some((field)=>
         field?.trim()===""
     )){

@@ -10,7 +10,7 @@ import { getUserWatchHistory,
         refreshAccessToken, 
         changeCurrentPassword, 
         updateAccountDetails
-        } from "../controllers/user.controllers.js"
+        } from "../controllers/user.controller.js"
 import { upload } from "../middleware/multer.middelware.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 const router = Router()
